@@ -1,2 +1,5 @@
 **/appsettings.json
 **/appsettings.*.json
+**/Debug
+**/obj
+**/obj/Debug

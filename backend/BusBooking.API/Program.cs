@@ -27,7 +27,7 @@ builder.Services.AddScoped<IJwtTokenGenerator, JwtTokenGenerator>();
 
 // Add services to the container.
 builder.Services.AddScoped<IAuthService, AuthService>();
-
+builder.Services.AddScoped<IBusService, BusService>();
 
 builder.Services.AddControllers();
 

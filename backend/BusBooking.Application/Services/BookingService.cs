@@ -212,8 +212,45 @@ public class BookingService : IBookingService
         throw new InvalidBookingOperationException("Could not update the booking due to a concurrent seat change. Please try again.");
     }
 
-    public Task<BookingResponse> CancelBooking(int userId, int bookingId, CancellationToken ct = default)
+    public async Task<BookingResponse> CancelBookingAsync(int userId, int bookingId, CancellationToken ct = default)
     {
-        throw new NotImplementedException();
+        for (var attempt = 1; attempt <= maxConcurrencyRetries; attempt++)
+        {
+            await using var transaction = await _db.BeginTransactionAsync(ct);
+            try
+            {
+                _db.ChangeTracker.Clear();
+                var booking = await _db.Bookings.FirstOrDefaultAsync(b => b.Id == bookingId, ct) ?? throw new EntityNotFoundException("Booking", bookingId);
+
+                if (booking.UserId != userId)
+                {
+                    throw new UnauthorizedAccessException("You are not allowed to access or modify this booking");
+                }
+
+                if (booking.Status == BookingStatus.Cancelled)
+                {
+                    throw new InvalidBookingOperationException("This booking is already cancelled");
+                }
+
+                var bus = await _db.Buses.FirstOrDefaultAsync(b => b.Id != booking.BusId, ct) ?? throw new EntityNotFoundException("Bus", booking.BusId);
+
+                bus.AvailableSeats += booking.SeatsBooked;
+                booking.Status = BookingStatus.Cancelled;
+
+                await _db.SaveChangesAsync(ct);
+                await transaction.CommitAsync(ct);
+
+                return await MapToResponseAsync(bookingId, ct);
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (attempt == maxConcurrencyRetries)
+                {
+                    throw new InvalidBookingOperationException("Could not complete the booking due to high demand for this bus. Please try again.");
+                }
+                await Task.Delay(50 * attempt, ct);
+            }
+        }
+        throw new InvalidBookingOperationException("Could not cancel the booking due to a concurrent update. Please try again.");
     }
 }

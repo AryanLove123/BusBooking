@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BusBooking.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260917162916_InitialCreate")]
+    [Migration("20260929102318_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -33,11 +33,17 @@ namespace BusBooking.Infrastructure.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<DateTime>("ArrivalUtc")
+                        .HasColumnType("datetime(6)");
+
                     b.Property<DateTime>("BookingDateUtc")
                         .HasColumnType("datetime(6)");
 
                     b.Property<int>("BusId")
                         .HasColumnType("int");
+
+                    b.Property<DateTime>("DepartureUtc")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<int>("SeatsBooked")
                         .HasColumnType("int");
@@ -70,9 +76,6 @@ namespace BusBooking.Infrastructure.Migrations
 
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("ArrivalUtc")
-                        .HasColumnType("datetime(6)");
-
                     b.Property<int>("AvailableSeats")
                         .HasColumnType("int");
 
@@ -89,13 +92,16 @@ namespace BusBooking.Infrastructure.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("varchar(50)");
 
-                    b.Property<DateTime>("DepartureUtc")
-                        .HasColumnType("datetime(6)");
+                    b.Property<TimeSpan>("DepartureTime")
+                        .HasColumnType("time(6)");
 
                     b.Property<string>("Destination")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("varchar(100)");
+
+                    b.Property<int>("DurationMinutes")
+                        .HasColumnType("int");
 
                     b.Property<decimal>("FarePerSeat")
                         .HasColumnType("decimal(10,2)");
@@ -117,7 +123,7 @@ namespace BusBooking.Infrastructure.Migrations
 
                     b.HasIndex("BusOperatorId");
 
-                    b.HasIndex("Source", "Destination", "DepartureUtc");
+                    b.HasIndex("Source", "Destination");
 
                     b.ToTable("Buses", (string)null);
                 });

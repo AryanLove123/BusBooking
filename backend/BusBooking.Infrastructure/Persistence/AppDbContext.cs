@@ -54,7 +54,7 @@ public class AppDbContext : DbContext, IAppDbContext
                 .HasForeignKey(x => x.BusOperatorId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            e.HasIndex(x => new { x.Source, x.Destination, x.DepartureUtc });
+            e.HasIndex(x => new { x.Source, x.Destination });
         });
 
         modelBuilder.Entity<Booking>(e =>

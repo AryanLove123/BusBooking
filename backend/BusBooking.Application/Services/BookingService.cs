@@ -42,8 +42,8 @@ public class BookingService : IBookingService
             BusNumber = booking.Bus.BusNumber,
             Source = booking.Bus.Source,
             Destination = booking.Bus.Destination,
-            DepartureUtc = booking.Bus.DepartureUtc,
-            ArrivalUtc = booking.Bus.ArrivalUtc,
+            DepartureUtc = booking.DepartureUtc,
+            ArrivalUtc = booking.ArrivalUtc,
             SeatsBooked = booking.SeatsBooked,
             TotalFare = booking.TotalFare,
             Status = booking.Status.ToString(),
@@ -68,11 +68,6 @@ public class BookingService : IBookingService
                 _db.ChangeTracker.Clear();
                 var bus = await _db.Buses.FirstOrDefaultAsync(b => b.Id == request.BusId, ct) ?? throw new EntityNotFoundException("Bus", request.BusId);
 
-                if (bus.DepartureUtc <= DateTime.UtcNow)
-                {
-                    throw new InvalidBookingOperationException("This bus has already departed and cannot be booked");
-                }
-
                 if (bus.AvailableSeats < request.SeatsRequested)
                 {
                     throw new InsufficeintSeatsException(request.SeatsRequested, bus.AvailableSeats);
@@ -80,6 +75,7 @@ public class BookingService : IBookingService
 
                 bus.AvailableSeats -= request.SeatsRequested;
 
+                var nowUtc = DateTime.UtcNow;
                 var booking = new Booking
                 {
                     UserId = userId,
@@ -87,7 +83,9 @@ public class BookingService : IBookingService
                     SeatsBooked = request.SeatsRequested,
                     TotalFare = bus.FarePerSeat * request.SeatsRequested,
                     Status = BookingStatus.Confirmed,
-                    BookingDateUtc = DateTime.UtcNow,
+                    DepartureUtc = bus.GetNextDepartureUtc(nowUtc),
+                    ArrivalUtc = bus.GetNextArrivalUtc(nowUtc),
+                    BookingDateUtc = nowUtc,
                     Passengers = request.Passengers.Select(p => new Passenger
                     {
                         Name = p.Name.Trim(),
@@ -168,7 +166,7 @@ public class BookingService : IBookingService
 
                 var bus = await _db.Buses.FirstOrDefaultAsync(bus => bus.Id == booking.BusId, ct) ?? throw new EntityNotFoundException("Bus", booking.BusId);
 
-                if (bus.DepartureUtc <= DateTime.UtcNow)
+                if (booking.DepartureUtc <= DateTime.UtcNow)
                 {
                     throw new InvalidBookingOperationException("This bus has already departed; the booking can no longer be edited.");
                 }

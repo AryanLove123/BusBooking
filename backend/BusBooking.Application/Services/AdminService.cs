@@ -39,8 +39,10 @@ public class AdminService : IAdminService
 
     public async Task<List<AdminBusResponse>> GetBusesAsync(CancellationToken ct = default)
     {
-        return await _db.Buses
-            .OrderBy(b => b.DepartureUtc)
+        var buses = await _db.Buses.ToListAsync(ct);
+        var nowUtc = DateTime.UtcNow;
+
+        return buses
             .Select(b => new AdminBusResponse
             {
                 BusId = b.Id,
@@ -48,11 +50,13 @@ public class AdminService : IAdminService
                 BusType = b.BusType,
                 Source = b.Source,
                 Destination = b.Destination,
-                DepartureUtc = b.DepartureUtc,
-                ArrivalUtc = b.ArrivalUtc,
+                DepartureUtc = b.GetNextDepartureUtc(nowUtc),
+                ArrivalUtc = b.GetNextArrivalUtc(nowUtc),
                 TotalSeats = b.TotalSeats,
                 AvailableSeats = b.AvailableSeats,
                 FarePerSeat = b.FarePerSeat
-            }).ToListAsync(ct);
+            })
+            .OrderBy(r => r.DepartureUtc)
+            .ToList();
     }
 }

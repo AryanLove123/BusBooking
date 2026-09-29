@@ -12,6 +12,8 @@ public class Booking
     public int SeatsBooked { get; set; }
     public decimal TotalFare { get; set; }
     public BookingStatus Status { get; set; } = BookingStatus.Confirmed;
+    public DateTime DepartureUtc { get; set; }
+    public DateTime ArrivalUtc { get; set; }
     public DateTime BookingDateUtc { get; set; } = DateTime.UtcNow;
     public ICollection<Passenger> Passengers { get; set; } = new List<Passenger>();
 }

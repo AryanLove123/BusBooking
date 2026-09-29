@@ -70,8 +70,8 @@ namespace BusBooking.Infrastructure.Migrations
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     Destination = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
-                    DepartureUtc = table.Column<DateTime>(type: "datetime(6)", nullable: false),
-                    ArrivalUtc = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    DepartureTime = table.Column<TimeSpan>(type: "time(6)", nullable: false),
+                    DurationMinutes = table.Column<int>(type: "int", nullable: false),
                     TotalSeats = table.Column<int>(type: "int", nullable: false),
                     AvailableSeats = table.Column<int>(type: "int", nullable: false),
                     FarePerSeat = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
@@ -101,6 +101,8 @@ namespace BusBooking.Infrastructure.Migrations
                     TotalFare = table.Column<decimal>(type: "decimal(10,2)", nullable: false),
                     Status = table.Column<string>(type: "varchar(20)", maxLength: 20, nullable: false)
                         .Annotation("MySql:CharSet", "utf8mb4"),
+                    DepartureUtc = table.Column<DateTime>(type: "datetime(6)", nullable: false),
+                    ArrivalUtc = table.Column<DateTime>(type: "datetime(6)", nullable: false),
                     BookingDateUtc = table.Column<DateTime>(type: "datetime(6)", nullable: false)
                 },
                 constraints: table =>
@@ -162,9 +164,9 @@ namespace BusBooking.Infrastructure.Migrations
                 column: "BusOperatorId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Buses_Source_Destination_DepartureUtc",
+                name: "IX_Buses_Source_Destination",
                 table: "Buses",
-                columns: new[] { "Source", "Destination", "DepartureUtc" });
+                columns: new[] { "Source", "Destination" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Passengers_BookingId",

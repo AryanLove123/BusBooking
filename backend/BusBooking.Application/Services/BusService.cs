@@ -24,40 +24,43 @@ public class BusService : IBusService
 
         if (string.Equals(request.Source.Trim(), request.Destination.Trim(), StringComparison.OrdinalIgnoreCase))
         {
-            throw new ValidationException("Source and Destination can not be identical");
+            throw new ValidationException("Source and Destination cannot be identical");
         }
 
         var source = request.Source.Trim().ToLower();
         var destination = request.Destination.Trim().ToLower();
 
-        var query = _db.Buses.Include(b => b.BusOperator).Where(b => b.Source.ToLower() == source && b.Destination.ToLower() == destination);
+        var buses = await _db.Buses
+            .Include(b => b.BusOperator)
+            .Where(b => b.Source.ToLower() == source && b.Destination.ToLower() == destination)
+            .ToListAsync(ct);
+
+        var nowUtc = DateTime.UtcNow;
+
+        var results = buses.Select(b => new BusSearchResponse
+        {
+            BusId = b.Id,
+            OperatorName = b.BusOperator?.Name ?? "Unknown",
+            BusNumber = b.BusNumber,
+            BusType = b.BusType,
+            Source = b.Source,
+            Destination = b.Destination,
+            DepartureUtc = b.GetNextDepartureUtc(nowUtc),
+            ArrivalUtc = b.GetNextArrivalUtc(nowUtc),
+            AvailableSeats = b.AvailableSeats,
+            FarePerSeat = b.FarePerSeat
+        }).AsEnumerable();
 
         if (request.PreferredDepartureAfterUTC.HasValue)
         {
-            query = query.Where(b => b.DepartureUtc >= request.PreferredDepartureAfterUTC.Value);
+            results = results.Where(b => b.DepartureUtc >= request.PreferredDepartureAfterUTC.Value);
         }
 
         if (request.PreferredArrivalBeforeUTC.HasValue)
         {
-            query = query.Where(b => b.ArrivalUtc <= request.PreferredArrivalBeforeUTC.Value);
+            results = results.Where(b => b.ArrivalUtc <= request.PreferredArrivalBeforeUTC.Value);
         }
 
-        var buses = await query.OrderBy(b => b.DepartureUtc).Select(
-            b => new BusSearchResponse
-            {
-                BusId = b.Id,
-                OperatorName = b.BusOperator!.Name,
-                BusNumber = b.BusNumber,
-                BusType = b.BusType,
-                Source = b.Source,
-                Destination = b.Destination,
-                DepartureUtc = b.DepartureUtc,
-                ArrivalUtc = b.ArrivalUtc,
-                AvailableSeats = b.AvailableSeats,
-                FarePerSeat = b.FarePerSeat
-            }
-        ).ToListAsync(ct);
-
-        return buses;
+        return results.OrderBy(b => b.DepartureUtc).ToList();
     }
 }

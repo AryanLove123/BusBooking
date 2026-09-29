@@ -21,4 +21,8 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/auth/register/register.component').then((m) => m.RegisterComponent),
   },
+  {
+    path: "book/:busId",
+    loadComponent: () => import("./features/booking/book/book.component").then((m) => m.BookComponent),
+  },
 ];

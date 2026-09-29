@@ -1,0 +1,63 @@
+<div class="container" style="max-width: 640px;">
+  @if (loading()) {
+    <div class="loading">Loading...</div>
+  } @else {
+    <div class="card">
+      <h2>{{ isEditMode() ? "Edit Booking" : "Passenger Details" }}</h2>
+
+      @if (bus(); as selectedBus) {
+        <p style="color: var(--muted);">
+          {{ selectedBus.operatorName }} — {{ selectedBus.busNumber }} · {{ selectedBus.source }} → {{ selectedBus.destination }} ·
+          {{ selectedBus.departureUtc | date:"medium" }} · ₹{{ selectedBus.farePerSeat }}/seat
+        </p>
+      }
+      @if (existingBooking(); as booking) {
+        <p style="color: var(--muted);">
+          {{ booking.operatorName }} — {{ booking.busNumber }} ·
+          {{ booking.source }} → {{ booking.destination }} ·
+          {{ booking.departureUtc | date:"medium" }}
+        </p>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <div class="form-group" style="max-width: 200px;">
+          <label>Number of seats</label>
+          <input type="number" formControlName="seatsRequested" min="1" max="10" (change)="onSeatsChanged()" />
+          @if (form.controls["seatsRequested"].invalid && form.controls["seatsRequested"].touched) {
+            <div class="error-text">Enter a valid seat count.</div>
+          }
+        </div>
+
+        <div formArrayName="passengers">
+          @for (p of passengers.controls; track $index) {
+            <div class="card" [formGroupName]="$index" style="background: var(--bg);">
+              <strong>Passenger {{ $index + 1 }}</strong>
+              <div class="row" style="margin-top: 8px;">
+                <div class="form-group">
+                  <label>Name</label>
+                  <input type="text" formControlName="name" />
+                </div>
+                <div class="form-group" style="max-width: 100px;">
+                  <label>Age</label>
+                  <input type="number" formControlName="age" min="1" max="120" />
+                </div>
+                <div class="form-group" style="max-width: 140px;">
+                  <label>Gender</label>
+                  <select formControlName="gender">
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+
+        <button class="btn" type="submit" [disabled]="submitting()">
+          {{ submitting() ? "Submitting..." : (isEditMode() ? "Save Changes" : "Confirm Booking") }}
+        </button>
+      </form>
+    </div>
+  }
+</div>

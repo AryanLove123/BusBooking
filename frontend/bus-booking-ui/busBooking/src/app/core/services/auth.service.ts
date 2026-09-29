@@ -9,6 +9,7 @@ const STORAGE_KEY = "busbooking_auth";
   providedIn: 'root',
 })
 export class AuthService {
+  base = `${environment.apiBaseUrl}/auth`;
   _currentUser = signal<LoginResponse | null >(this.readStorage());
   isLoggedIn = computed(() => !!this._currentUser());
   isAdmin = computed(() => this._currentUser()?.role == "Admin");
@@ -16,12 +17,12 @@ export class AuthService {
   constructor(private http: HttpClient) {}
 
   register(request:RegisterRequest): Observable<LoginResponse>{
-    return this.http.post<LoginResponse>(`${environment.apiBaseUrl}/auth/register`, request)
+    return this.http.post<LoginResponse>(`${this.base}/register`, request)
       .pipe((tap((res) => this.setSession(res))));
   }
   
   login(request: LoginRequest): Observable<LoginResponse>{
-    return this.http.post<LoginResponse>(`${environment.apiBaseUrl}/auth/login`, request)
+    return this.http.post<LoginResponse>(`${this.base}/login`, request)
       .pipe(tap((res => this.setSession(res))));
   }
 

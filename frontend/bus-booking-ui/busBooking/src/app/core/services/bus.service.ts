@@ -8,6 +8,7 @@ import { environment } from '../../environments/environment';
   providedIn: 'root',
 })
 export class BusService {
+  base = `${environment.apiBaseUrl}/buses`;
   constructor(private http: HttpClient){}
 
   search(params: BusSearchParams): Observable<BusSearchResult[]>{
@@ -18,6 +19,6 @@ export class BusService {
     if (params.departureAfter) httpParams = httpParams.set("departureAfter", params.departureAfter);
     if (params.arrivalBefore) httpParams = httpParams.set("arrivalBefore", params.arrivalBefore);
 
-    return this.http.get<BusSearchResult[]>(`${environment.apiBaseUrl}/buses/search`, {params: httpParams});
+    return this.http.get<BusSearchResult[]>(`${this.base}/search`, {params: httpParams});
   }
 }

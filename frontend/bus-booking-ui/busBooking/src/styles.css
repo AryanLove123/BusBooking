@@ -1,1 +1,71 @@
-/* You can add global styles to this file, and also import other style files */
+:root {
+  --primary: #1e5f8c;
+  --primary-dark: #143f5c;
+  --accent: #e07a3f;
+  --bg: #f5f7fa;
+  --card-bg: #ffffff;
+  --border: #dbe2ea;
+  --text: #22303f;
+  --muted: #64748b;
+  --danger: #c0392b;
+  --success: #2f855a;
+}
+
+* {box-sizing: border-box;}
+
+body{
+    margin: 0;
+    font-family: "Segoe UI", Roboto, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+}
+
+.container{
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 24px 16px;
+}
+
+.card{
+   background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 16px; 
+}
+
+.btn {
+  display: inline-block;
+  padding: 10px 18px;
+  border-radius: 6px;
+  border: none;
+  background: var(--primary);
+  color: #fff;
+  cursor: pointer;
+  font-size: 14px;
+}
+.btn:hover { background: var(--primary-dark); }
+.btn:disabled { background: #a9b6c2; cursor: not-allowed; }
+.btn.secondary { background: #fff; color: var(--primary); border: 1px solid var(--primary); }
+.btn.danger { background: var(--danger); }
+.btn.small { padding: 6px 12px; font-size: 13px; }
+
+
+.form-group { margin-bottom: 14px; }
+.form-group label { display: block; font-size: 13px; margin-bottom: 4px; color: var(--muted); }
+.form-group input, .form-group select {
+  width: 100%;
+  padding: 9px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.error-text { color: var(--danger); font-size: 13px; margin-top: 4px; }
+.success-text { color: var(--success); font-size: 13px; }
+
+.loading { text-align: center; padding: 24px; color: var(--muted); }
+
+
+.row { display: flex; gap: 16px; flex-wrap: wrap; }
+.row > * { flex: 1; min-width: 200px; }

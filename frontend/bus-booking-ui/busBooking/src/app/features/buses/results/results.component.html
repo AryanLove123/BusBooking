@@ -1,0 +1,33 @@
+<div class="container">
+    <h2>{{source}} → {{destination}}</h2>
+
+    @if (loading) {
+    <div class="loading">Searching buses...</div>
+  } @else if (results.length === 0) {
+    <div class="empty-state">
+      No buses found for this route/time. Try different dates or a nearby route.
+    </div>
+  } @else {
+    @for (bus of results; track bus.busId) {
+      <div class="card">
+        <div class="row" style="align-items: center;">
+          <div>
+            <strong>{{ bus.operatorName }}</strong> — {{ bus.busNumber }} ({{ bus.busType }})<br>
+            <span style="color: var(--muted); font-size: 14px;">
+              Departs {{ bus.departureUtc | date:"medium" }} → Arrives {{ bus.arrivalUtc | date:"medium" }}
+            </span>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-size: 18px; font-weight: 700;">₹{{ bus.farePerSeat }}</div>
+            <div style="font-size: 13px; color: var(--muted);">{{ bus.availableSeats }} seats left</div>
+            <button class="btn small" style="margin-top: 8px;"
+                    [disabled]="bus.availableSeats === 0"
+                    (click)="selectBus(bus)">
+              {{ bus.availableSeats === 0 ? "Sold out" : "Select" }}
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+  }
+</div>

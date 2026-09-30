@@ -37,6 +37,22 @@ export class BookComponent implements OnInit {
     return this.form.get('passengers') as FormArray;
   }
 
+  setPassengerCount(count: number): void {
+    while (this.passengers.length < count) {
+      this.passengers.push(
+        this.fb.group({
+          name: ['', Validators.required],
+          age: [18, [Validators.required, Validators.min(1), Validators.max(120)]],
+          gender: [0, Validators.required],
+        }),
+      );
+    }
+
+    while (this.passengers.length > count) {
+      this.passengers.removeAt(this.passengers.length - 1);
+    }
+  }
+
   ngOnInit(): void {
     const editMode = this.route.snapshot.routeConfig?.path === 'bookings/:id/edit';
     this.isEditMode.set(editMode);
@@ -98,22 +114,6 @@ export class BookComponent implements OnInit {
     this.setPassengerCount(1);
 
     this.loading.set(false);
-  }
-
-  setPassengerCount(count: number): void {
-    while (this.passengers.length < count) {
-      this.passengers.push(
-        this.fb.group({
-          name: ['', Validators.required],
-          age: [18, [Validators.required, Validators.min(1), Validators.max(120)]],
-          gender: ['Male', Validators.required],
-        }),
-      );
-    }
-
-    while (this.passengers.length > count) {
-      this.passengers.removeAt(this.passengers.length - 1);
-    }
   }
 
   onSeatsChanged(): void {

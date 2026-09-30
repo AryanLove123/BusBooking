@@ -1,0 +1,47 @@
+<div class="container">
+    <h2>My Bookings</h2>
+
+    @if(loading()){
+    <div class="loading">Loading...</div>
+    } @else if (bookings().length ===0) {
+    <div class="empty-state">
+        You have no bookings yet. <a routerLink="/">Search for a bus</a> to get started.
+    </div>
+    } @else {
+    @for(b of bookings(); track b.bookingId){
+    <div class="card">
+        <div class="row" style="align-items: center;">
+            <div>
+                <strong>#{{ b.bookingId }} — {{ b.source }} → {{ b.destination }}</strong>
+                <span class="badge" [class.confirmed]="b.status === 'Confirmed'"
+                    [class.cancelled]="b.status === 'Cancelled'" style="margin-left: 8px;">{{ b.status }}</span>
+                <br>
+                <span style="font-size: 14px; color: var(--muted);">
+                    {{ b.operatorName }} — {{ b.busNumber }} · Departs {{ b.departureUtc | date:"medium" }}
+                </span>
+                <br>
+                <span style="font-size: 13px; color: var(--muted);">
+                    Booked on {{ b.bookingDateUtc | date:"medium" : "UTC"}}
+                </span>
+                <br>
+                <span style="font-size: 14px;">{{ b.seatsBooked }} seat(s) · ₹{{ b.totalFare }}</span>
+                <ul style="font-size: 13px; color: var(--muted); margin: 6px 0 0 18px;">
+                    @for (p of b.passengers; track p.name) {
+                    <li>{{ p.name }}, {{ p.age }}, {{ p.gender }}</li>
+                    }
+                </ul>
+            </div>
+            @if(b.status === "Confirmed" && !hasDeparted(b)){
+            <div style="text-align: right;">
+                <button class="btn secondary small" (click)="edit(b)">Edit</button>
+                <button class="btn danger small" style="margin-left: 6px;" [disabled]="cancellingId === b.bookingId"
+                    (click)="cancel(b)">
+                    {{ cancellingId === b.bookingId ? "Cancelling..." : "Cancel" }}
+                </button>
+            </div>
+            }
+        </div>
+    </div>
+    }
+    }
+</div>

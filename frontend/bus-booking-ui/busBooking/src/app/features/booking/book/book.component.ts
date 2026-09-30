@@ -144,7 +144,7 @@ export class BookComponent implements OnInit {
           next: () => {
             this.notify.success('Booking updated successfully!');
 
-            this.router.navigate(['/history']);
+            this.router.navigate(['/view-bookings']);
           },
 
           error: (err) => {

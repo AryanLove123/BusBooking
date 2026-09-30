@@ -14,7 +14,7 @@
           <div>
             <strong>{{ bus.operatorName }}</strong> — {{ bus.busNumber }} ({{ bus.busType }})<br>
             <span style="color: var(--muted); font-size: 14px;">
-              Departs {{ bus.departureUtc | date:"medium" }} → Arrives {{ bus.arrivalUtc | date:"medium" }}
+              Departs {{ bus.departureUtc | date:"medium" :'UTC'}} → Arrives {{ bus.arrivalUtc | date:"medium" }}
             </span>
           </div>
           <div style="text-align: right;">

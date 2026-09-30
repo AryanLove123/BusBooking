@@ -26,6 +26,10 @@ export const routes: Routes = [
     loadComponent: () => import("./features/booking/view-bookings/view-bookings.component").then((m) => m.ViewBookingsComponent),
   },
   {
+    path: "admin",
+    loadComponent: () => import("./features/admin/admin.component").then((m) => m.AdminComponent),
+  },
+  {
     path: "book/:busId",
     loadComponent: () => import("./features/booking/book/book.component").then((m) => m.BookComponent),
   },

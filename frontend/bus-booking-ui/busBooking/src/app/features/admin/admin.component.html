@@ -1,0 +1,125 @@
+<div class="container">
+    <h2>Admin Portal</h2>
+    <p style="color: var(--muted); margin-top: -8px;">Manage bus operators, add buses, and review bookings.</p>
+
+    <h3>Buses</h3>
+    @if(loadingBuses()){
+    <div class="loading">Loading buses...</div>
+    } @else {
+    @for (bus of buses(); track bus.busId) {
+    <div class="card">
+        <div class="row" style="align-items: center;">
+            <div>
+                <strong>{{ bus.busNumber }}</strong> ({{ bus.busType }}) — {{ bus.source }} → {{ bus.destination }}<br>
+                <span style="font-size: 13px; color: var(--muted);">
+                    Departs {{ bus.departureUtc | date:"medium" }} · {{ bus.availableSeats }}/{{ bus.totalSeats }} seats
+                    available · ₹{{ bus.farePerSeat }}
+                </span>
+            </div>
+            <button class="btn small" (click)="viewBookings(bus)">View Bookings</button>
+        </div>
+    </div>
+    }
+    }
+
+    @if (selectedBus) {
+    <h3>Bookings for {{ selectedBus.busNumber }} ({{ selectedBus.source }} → {{ selectedBus.destination }})</h3>
+    @if (loadingBookings()) {
+    <div class="loading">Loading bookings...</div>
+    } @else if (bookings.length === 0) {
+    <div class="empty-state">No bookings for this bus yet.</div>
+    } @else {
+    @for (b of bookings(); track b.bookingId) {
+    <div class="card">
+        <strong>#{{ b.bookingId }}</strong> — {{ b.userName }} ({{ b.userEmail }})
+        <span class="badge" [class.confirmed]="b.status === 'Confirmed'" [class.cancelled]="b.status === 'Cancelled'"
+            style="margin-left: 8px;">{{ b.status }}</span>
+        <br>
+        <span style="font-size: 14px;">{{ b.seatsBooked }} seat(s) · ₹{{ b.totalFare }} · Booked {{ b.bookingDateUtc |
+            date:"medium" }}</span>
+    </div>
+    }
+    }
+    }
+
+
+    <h3>Buses</h3>
+  @if (loadingBuses()) {
+    <div class="loading">Loading buses...</div>
+  } @else {
+    @for (bus of buses(); track bus.busId) {
+      <div class="card">
+        <div class="row" style="align-items: center;">
+          <div>
+            <strong>{{ bus.busNumber }}</strong> ({{ bus.busType }}) — {{ bus.source }} → {{ bus.destination }}<br>
+            <span style="font-size: 13px; color: var(--muted);">
+              Departs {{ bus.departureUtc | date:"medium" }} · {{ bus.availableSeats }}/{{ bus.totalSeats }} seats available · ₹{{ bus.farePerSeat }}
+            </span>
+          </div>
+          <button class="btn small" (click)="viewBookings(bus)">View Bookings</button>
+        </div>
+      </div>
+    }
+  }
+
+  <div class="card" style="background: var(--bg);">
+    <strong>Add a New Bus</strong>
+    <p style="font-size: 13px; color: var(--muted); margin-top: 2px;">
+      Runs daily at the time you set below - see docs/DailyScheduleDesign.md for why.
+    </p>
+    <form [formGroup]="busForm" (ngSubmit)="submitBus()" style="margin-top: 10px;">
+      <div class="row">
+        <div class="form-group">
+          <label>Operator</label>
+          <select formControlName="busOperatorId">
+            <option [ngValue]="null" disabled>Select an operator</option>
+            @for (op of operators(); track op.operatorId) {
+              <option [ngValue]="op.operatorId">{{ op.name }}</option>
+            }
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Bus number</label>
+          <input type="text" formControlName="busNumber" placeholder="e.g. HT-501" />
+        </div>
+        <div class="form-group">
+          <label>Bus type</label>
+          <input type="text" formControlName="busType" placeholder="e.g. AC Sleeper" />
+        </div>
+      </div>
+      <div class="row">
+        <div class="form-group">
+          <label>From</label>
+          <input type="text" formControlName="source" placeholder="e.g. Delhi" />
+        </div>
+        <div class="form-group">
+          <label>To</label>
+          <input type="text" formControlName="destination" placeholder="e.g. Chandigarh" />
+        </div>
+        <div class="form-group">
+          <label>Departure time (daily, UTC)</label>
+          <input type="time" formControlName="departureTime" />
+        </div>
+      </div>
+      <div class="row">
+        <div class="form-group">
+          <label>Journey duration (minutes)</label>
+          <input type="number" formControlName="durationMinutes" min="1" max="2880" />
+        </div>
+        <div class="form-group">
+          <label>Total seats</label>
+          <input type="number" formControlName="totalSeats" min="1" max="100" />
+        </div>
+        <div class="form-group">
+          <label>Fare per seat (₹)</label>
+          <input type="number" formControlName="farePerSeat" min="0.01" step="0.01" />
+        </div>
+      </div>
+      @if (busForm.invalid && busForm.touched) {
+        <div class="error-text">Please fill in every field correctly, including choosing an operator.</div>
+      }
+      <button class="btn" type="submit" [disabled]="savingBus()">{{ savingBus() ? "Adding..." : "Add Bus" }}</button>
+    </form>
+  </div>
+
+</div>

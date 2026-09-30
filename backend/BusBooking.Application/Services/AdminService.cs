@@ -1,8 +1,11 @@
+using System.ComponentModel.DataAnnotations;
+using System.Globalization;
 using BusBooking.Application.Common;
 using BusBooking.Application.DTOs;
 using BusBooking.Application.DTOs.Admin;
 using BusBooking.Application.Interfaces;
 using BusBooking.Domain.Exceptions;
+using BusBooking.Domain.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace BusBooking.Application.Services;
@@ -17,7 +20,12 @@ public class AdminService : IAdminService
     }
     public async Task<List<AdminBookingResponse>> GetBookingsForBusAsync(int busId, CancellationToken ct = default)
     {
-        var busExist = await _db.Buses.FirstOrDefaultAsync(b => b.Id == busId) ?? throw new EntityNotFoundException("Bus", busId);
+        var busExist = await _db.Buses.AnyAsync(b => b.Id == busId);
+
+        if (!busExist)
+        {
+            throw new EntityNotFoundException("Bus", busId);
+        }
 
         return await _db.Bookings
         .Include(b => b.User)
@@ -58,5 +66,57 @@ public class AdminService : IAdminService
             })
             .OrderBy(r => r.DepartureUtc)
             .ToList();
+    }
+
+    public async Task<AdminBusResponse> CreateBusAsync(CreateBusRequest request, CancellationToken ct = default)
+    {
+        if(string.Equals(request.Source.Trim(), request.Destination.Trim(), StringComparison.OrdinalIgnoreCase))
+        {
+            throw new ValidationException("Source and Destination cannot be identical");
+        }
+
+        var operatorExists = await _db.BusOperators.AnyAsync(o => o.Id == request.BusOperatorId, ct);
+
+        if (!operatorExists)
+        {
+            throw new EntityNotFoundException("Bus Operator", request.BusOperatorId);
+        }
+
+        if (!TimeSpan.TryParseExact(request.DepartureTime, @"hh\:mm", CultureInfo.InvariantCulture, out var departureTime))
+        {
+            throw new ValidationException("Departure time must be in HH:mm 24-hour format, e.g. 22:00.");
+        }
+
+        var bus = new Bus
+        {
+            BusOperatorId = request.BusOperatorId,
+            BusNumber = request.BusNumber,
+            BusType = request.BusType.Trim(),
+            Source = request.Source.Trim(),
+            Destination = request.Destination.Trim(),
+            DepartureTime = departureTime,
+            DurationMinutes = request.DurationMinutes,
+            TotalSeats = request.TotalSeats,
+            AvailableSeats = request.TotalSeats,
+            FarePerSeat = request.FarePerSeat
+        };
+
+        _db.Buses.Add(bus);
+        await _db.SaveChangesAsync(ct);
+
+        var nowUtc = DateTime.UtcNow;
+        return new AdminBusResponse
+        {
+            BusId = bus.Id,
+            BusNumber = bus.BusNumber,
+            BusType = bus.BusType,
+            Source = bus.Source,
+            Destination = bus.Destination,
+            DepartureUtc = bus.GetNextDepartureUtc(nowUtc),
+            ArrivalUtc = bus.GetNextArrivalUtc(nowUtc),
+            TotalSeats = bus.TotalSeats,
+            AvailableSeats = bus.AvailableSeats,
+            FarePerSeat = bus.FarePerSeat
+        };
     }
 }

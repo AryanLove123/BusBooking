@@ -33,4 +33,11 @@ public class AdminController : ControllerBase
         var result = await _adminService.GetBookingsForBusAsync(busId, ct);
         return Ok(result);
     }
+
+    [HttpPost("buses")]
+    public async Task<ActionResult<AdminBusResponse>> CreateBus([FromBody] CreateBusRequest request, CancellationToken ct)
+    {
+        var result = await _adminService.CreateBusAsync(request, ct);
+        return CreatedAtAction(nameof(GetBuses), result);
+    }
 }

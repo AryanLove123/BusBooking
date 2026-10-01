@@ -13,12 +13,14 @@ public class AuthService : IAuthService
     private IAppDbContext _db;
     private IPasswordHasher _hasher;
     private IJwtTokenGenerator _tokenGenerator;
+    private IAppLogger _logger;
 
-    public AuthService(IAppDbContext db, IPasswordHasher hasher, IJwtTokenGenerator tokenGenerator)
+    public AuthService(IAppDbContext db, IPasswordHasher hasher, IJwtTokenGenerator tokenGenerator, IAppLogger logger)
     {
         _db = db;
         _hasher = hasher;
         _tokenGenerator = tokenGenerator;
+        _logger = logger;
     }
 
     public async Task<LoginResponse> RegisterAsync(RegisterRequest request, CancellationToken ct = default)
@@ -28,6 +30,7 @@ public class AuthService : IAuthService
         var exists = await _db.Users.AnyAsync(u => u.Email == normalizedEmail, ct);
         if (exists)
         {
+            await _logger.LogWarningAsync($"Attempt to register with duplicate email: {normalizedEmail}");
             throw new DuplicateEmailException(normalizedEmail);
         }
 
@@ -41,6 +44,8 @@ public class AuthService : IAuthService
 
         _db.Users.Add(user);
         await _db.SaveChangesAsync(ct);
+
+        await _logger.LogInformationAsync($"User registration successful for {normalizedEmail}", user.Id);
 
         var (token, expires) = _tokenGenerator.GenerateToken(user);
 
@@ -62,8 +67,11 @@ public class AuthService : IAuthService
 
         if (user is null || !_hasher.Verify(request.Password, user.PasswordHash))
         {
+            await _logger.LogWarningAsync($"Failed login attempt for {normalizedEmail}");
             throw new ValidationException("Invalid email or password");
         }
+
+        await _logger.LogInformationAsync($"User login successful for {normalizedEmail}", user.Id);
 
         var (token, expires) = _tokenGenerator.GenerateToken(user);
 

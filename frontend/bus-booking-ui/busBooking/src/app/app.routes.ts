@@ -37,5 +37,9 @@ export const routes: Routes = [
     path: "booking-confirmation/:id",
     loadComponent: () => import("./features/booking/confirmation/confirmation.component").then((m) => m.ConfirmationComponent),
   },
+  {
+    path: "bookings/:id/edit",
+    loadComponent: () => import("./features/booking/book/book.component").then((m) => m.BookComponent),
+  },
   { path: "**", redirectTo: "" }
 ];

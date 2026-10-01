@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Net;
+using BusBooking.Application.Interfaces;
 using BusBooking.Domain.Exceptions;
 using ValidationException = BusBooking.Domain.Exceptions.ValidationException;
 
@@ -16,7 +17,7 @@ public class GlobalExceptionMiddleware
         _logger = logger;
     }
 
-    public async Task InvokeAsync(HttpContext context)
+    public async Task InvokeAsync(HttpContext context, IAppLogger appLogger)
     {
         try
         {
@@ -34,10 +35,12 @@ public class GlobalExceptionMiddleware
             if(statusCode == HttpStatusCode.InternalServerError)
             {
                 _logger.LogError(ex, "Unhandled exception occurred. TraceId: {TraceId}, UserId: {UserId}", traceId, userId);
+                await appLogger.LogErrorAsync($"Unhandled exception: {ex.Message}", ex, userId, context.Request.Path, traceId);
             }
             else
             {
                 _logger.LogWarning(ex, "Handled exception occurred. TraceId: {TraceId}, UserId: {UserId}", traceId, userId);
+                await appLogger.LogWarningAsync($"{ex.GetType().Name}: {ex.Message}", userId, context.Request.Path, traceId);
             }
 
             context.Response.ContentType = "application/json";

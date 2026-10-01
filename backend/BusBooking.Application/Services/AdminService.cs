@@ -12,10 +12,12 @@ namespace BusBooking.Application.Services;
 public class AdminService : IAdminService
 {
     private IAppDbContext _db;
+    private IAppLogger _logger;
 
-    public AdminService(IAppDbContext db)
+    public AdminService(IAppDbContext db, IAppLogger logger)
     {
         _db = db;
+        _logger = logger;
     }
     public async Task<List<AdminBookingResponse>> GetBookingsForBusAsync(int busId, CancellationToken ct = default)
     {
@@ -102,6 +104,8 @@ public class AdminService : IAdminService
 
         _db.Buses.Add(bus);
         await _db.SaveChangesAsync(ct);
+
+        await _logger.LogInformationAsync($"Bus {bus.BusNumber} (id {bus.Id}) created by admin for route {bus.Source} -> {bus.Destination}");
 
         var nowUtc = DateTime.UtcNow;
         return new AdminBusResponse

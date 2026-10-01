@@ -43,7 +43,7 @@ export class BookComponent implements OnInit {
         this.fb.group({
           name: ['', Validators.required],
           age: [18, [Validators.required, Validators.min(1), Validators.max(120)]],
-          gender: [0, Validators.required],
+          gender: ["Male", Validators.required],
         }),
       );
     }

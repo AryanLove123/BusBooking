@@ -15,6 +15,8 @@ public class AppDbContext : DbContext, IAppDbContext
     public DbSet<Bus> Buses => Set<Bus>();
     public DbSet<Booking> Bookings => Set<Booking>();
     public DbSet<Passenger> Passengers => Set<Passenger>();
+    public DbSet<ApplicationLog> ApplicationLogs => Set<ApplicationLog>();
+
     public async Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken ct = default)
         => await Database.BeginTransactionAsync(ct);
 

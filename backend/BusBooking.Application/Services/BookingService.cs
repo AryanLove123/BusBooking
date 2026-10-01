@@ -11,12 +11,14 @@ namespace BusBooking.Application.Services;
 public class BookingService : IBookingService
 {
     private IAppDbContext _db;
+    private IAppLogger _logger;
 
     private const int maxConcurrencyRetries = 3;
 
-    public BookingService(IAppDbContext db)
+    public BookingService(IAppDbContext db, IAppLogger logger)
     {
         _db = db;
+        _logger = logger;
     }
 
     private static void ValidatePassengerCnt(int seatsRequested, List<PassengerDto> passengers)
@@ -69,6 +71,9 @@ public class BookingService : IBookingService
 
                 if (bus.AvailableSeats < request.SeatsRequested)
                 {
+                    await _logger.LogWarningAsync(
+                        $"Insufficient seats for bus {bus.Id}: requested {request.SeatsRequested}, available {bus.AvailableSeats}",
+                        userId);
                     throw new InsufficientSeatsException(request.SeatsRequested, bus.AvailableSeats);
                 }
 
@@ -98,6 +103,9 @@ public class BookingService : IBookingService
                 await _db.SaveChangesAsync(ct);
                 await transaction.CommitAsync(ct);
 
+                await _logger.LogInformationAsync(
+                    $"Booking {booking.Id} created for user {userId} on bus {bus.Id} ({request.SeatsRequested} seats)", userId);
+
                 return await MapToResponseAsync(booking.Id, ct);
             }
             catch (DbUpdateConcurrencyException)
@@ -118,6 +126,7 @@ public class BookingService : IBookingService
 
         if (userId != booking.UserId)
         {
+            await _logger.LogWarningAsync($"User {userId} attempted to access booking {bookingId} owned by another user", userId);
             throw new UnauthorizedAccessException("You are not allowed to access or modify this booking");
         }
         return await MapToResponseAsync(bookingId, ct);
@@ -154,6 +163,7 @@ public class BookingService : IBookingService
 
                 if (booking.UserId != userId)
                 {
+                    await _logger.LogWarningAsync($"User {userId} attempted to access booking {bookingId} owned by another user", userId);
                     throw new UnauthorizedAccessException("You are not allowed to access or modify this booking");
 
                 }
@@ -195,6 +205,8 @@ public class BookingService : IBookingService
                 await _db.SaveChangesAsync(ct);
                 await transaction.CommitAsync(ct);
 
+                await _logger.LogInformationAsync($"Booking {booking.Id} updated by user {userId}", userId);
+
                 return await MapToResponseAsync(bookingId, ct);
             }
             catch (DbUpdateConcurrencyException)
@@ -221,6 +233,7 @@ public class BookingService : IBookingService
 
                 if (booking.UserId != userId)
                 {
+                    await _logger.LogWarningAsync($"User {userId} attempted to cancel booking {bookingId} owned by another user", userId);
                     throw new UnauthorizedAccessException("You are not allowed to access or modify this booking");
                 }
 
@@ -236,6 +249,8 @@ public class BookingService : IBookingService
 
                 await _db.SaveChangesAsync(ct);
                 await transaction.CommitAsync(ct);
+                
+                await _logger.LogInformationAsync($"Booking {booking.Id} cancelled by user {userId}, {booking.SeatsBooked} seats restored", userId);
 
                 return await MapToResponseAsync(bookingId, ct);
             }

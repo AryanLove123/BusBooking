@@ -1,5 +1,6 @@
 using System.Text;
 using System.Text.Json.Serialization;
+using BusBooking.API.Middleware;
 using BusBooking.API.Services;
 using BusBooking.Application.Common;
 using BusBooking.Application.Interfaces;
@@ -115,6 +116,8 @@ using (var scope = app.Services.CreateScope())
     var hasher = scope.ServiceProvider.GetRequiredService<IPasswordHasher>();
     await DbSeeder.SeedAsync(db, hasher);
 }
+
+app.UseMiddleware<GlobalExceptionMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

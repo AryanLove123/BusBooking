@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using BusBooking.Application.Common;
 using BusBooking.Application.DTOs;
 using BusBooking.Application.Interfaces;

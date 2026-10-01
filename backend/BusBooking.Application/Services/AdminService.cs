@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using BusBooking.Application.Common;
 using BusBooking.Application.DTOs;

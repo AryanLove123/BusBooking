@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 using BusBooking.Application.Common;
 using BusBooking.Application.DTOs.Booking;
 using BusBooking.Application.Interfaces;
@@ -70,7 +69,7 @@ public class BookingService : IBookingService
 
                 if (bus.AvailableSeats < request.SeatsRequested)
                 {
-                    throw new InsufficeintSeatsException(request.SeatsRequested, bus.AvailableSeats);
+                    throw new InsufficientSeatsException(request.SeatsRequested, bus.AvailableSeats);
                 }
 
                 bus.AvailableSeats -= request.SeatsRequested;
@@ -175,7 +174,7 @@ public class BookingService : IBookingService
 
                 if (seatDelta > 0 && bus.AvailableSeats < seatDelta)
                 {
-                    throw new InsufficeintSeatsException(seatDelta, bus.AvailableSeats);
+                    throw new InsufficientSeatsException(seatDelta, bus.AvailableSeats);
                 }
 
                 bus.AvailableSeats -= seatDelta;

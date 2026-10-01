@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { AdminBookingResponse, AdminBusResponse, CreateBusRequest } from '../models/admin.model';
+import { AdminBookingResponse, AdminBusResponse, BusOperatorResponse, CreateBusRequest } from '../models/admin.model';
 
 @Injectable({
   providedIn: 'root',
@@ -22,6 +22,10 @@ export class AdminService {
 
   createBus(request: CreateBusRequest): Observable<AdminBusResponse>{
     return this.http.post<AdminBusResponse>(`${this.base}/buses`, request);
+  }
+
+  getBusOperators(): Observable<BusOperatorResponse[]>{
+    return this.http.get<BusOperatorResponse[]>(`${this.base}/operators`);
   }
 
 }

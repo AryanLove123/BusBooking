@@ -40,4 +40,11 @@ public class AdminController : ControllerBase
         var result = await _adminService.CreateBusAsync(request, ct);
         return CreatedAtAction(nameof(GetBuses), result);
     }
+
+    [HttpGet("operators")]
+    public async Task<ActionResult<List<BusOperatorResponse>>> GetBusOperators(CancellationToken ct)
+    {
+        var result = await _adminService.GetBusOperatorsAsync(ct);
+        return Ok(result);
+    }
 }

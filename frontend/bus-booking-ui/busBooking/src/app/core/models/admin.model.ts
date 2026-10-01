@@ -41,3 +41,10 @@ export interface BusOperatorResponse {
   contactPhone?: string;
   busCount: number;
 }
+export interface BusOperatorResponse {
+  operatorId: number;
+  name: string;
+  contactEmail?: string;
+  contactPhone?: string;
+  busCount: number;
+}

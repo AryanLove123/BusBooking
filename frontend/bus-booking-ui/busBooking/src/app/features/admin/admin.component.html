@@ -1,66 +1,6 @@
 <div class="container">
-    <h2>Admin Portal</h2>
-    <p style="color: var(--muted); margin-top: -8px;">Manage bus operators, add buses, and review bookings.</p>
-
-    <h3>Buses</h3>
-    @if(loadingBuses()){
-    <div class="loading">Loading buses...</div>
-    } @else {
-    @for (bus of buses(); track bus.busId) {
-    <div class="card">
-        <div class="row" style="align-items: center;">
-            <div>
-                <strong>{{ bus.busNumber }}</strong> ({{ bus.busType }}) — {{ bus.source }} → {{ bus.destination }}<br>
-                <span style="font-size: 13px; color: var(--muted);">
-                    Departs {{ bus.departureUtc | date:"medium" }} · {{ bus.availableSeats }}/{{ bus.totalSeats }} seats
-                    available · ₹{{ bus.farePerSeat }}
-                </span>
-            </div>
-            <button class="btn small" (click)="viewBookings(bus)">View Bookings</button>
-        </div>
-    </div>
-    }
-    }
-
-    @if (selectedBus) {
-    <h3>Bookings for {{ selectedBus.busNumber }} ({{ selectedBus.source }} → {{ selectedBus.destination }})</h3>
-    @if (loadingBookings()) {
-    <div class="loading">Loading bookings...</div>
-    } @else if (bookings.length === 0) {
-    <div class="empty-state">No bookings for this bus yet.</div>
-    } @else {
-    @for (b of bookings(); track b.bookingId) {
-    <div class="card">
-        <strong>#{{ b.bookingId }}</strong> — {{ b.userName }} ({{ b.userEmail }})
-        <span class="badge" [class.confirmed]="b.status === 'Confirmed'" [class.cancelled]="b.status === 'Cancelled'"
-            style="margin-left: 8px;">{{ b.status }}</span>
-        <br>
-        <span style="font-size: 14px;">{{ b.seatsBooked }} seat(s) · ₹{{ b.totalFare }} · Booked {{ b.bookingDateUtc |
-            date:"medium" }}</span>
-    </div>
-    }
-    }
-    }
-
-
-    <h3>Buses</h3>
-  @if (loadingBuses()) {
-    <div class="loading">Loading buses...</div>
-  } @else {
-    @for (bus of buses(); track bus.busId) {
-      <div class="card">
-        <div class="row" style="align-items: center;">
-          <div>
-            <strong>{{ bus.busNumber }}</strong> ({{ bus.busType }}) — {{ bus.source }} → {{ bus.destination }}<br>
-            <span style="font-size: 13px; color: var(--muted);">
-              Departs {{ bus.departureUtc | date:"medium" }} · {{ bus.availableSeats }}/{{ bus.totalSeats }} seats available · ₹{{ bus.farePerSeat }}
-            </span>
-          </div>
-          <button class="btn small" (click)="viewBookings(bus)">View Bookings</button>
-        </div>
-      </div>
-    }
-  }
+  <h2>Admin Portal</h2>
+  <p style="color: var(--muted); margin-top: -8px;">Add buses, and view bookings.</p>
 
   <div class="card" style="background: var(--bg);">
     <strong>Add a New Bus</strong>
@@ -74,7 +14,7 @@
           <select formControlName="busOperatorId">
             <option [ngValue]="null" disabled>Select an operator</option>
             @for (op of operators(); track op.operatorId) {
-              <option [ngValue]="op.operatorId">{{ op.name }}</option>
+            <option [ngValue]="op.operatorId">{{ op.name }}</option>
             }
           </select>
         </div>
@@ -116,10 +56,50 @@
         </div>
       </div>
       @if (busForm.invalid && busForm.touched) {
-        <div class="error-text">Please fill in every field correctly, including choosing an operator.</div>
+      <div class="error-text">Please fill in every field correctly, including choosing an operator.</div>
       }
       <button class="btn" type="submit" [disabled]="savingBus()">{{ savingBus() ? "Adding..." : "Add Bus" }}</button>
     </form>
   </div>
+
+  <h3>Buses</h3>
+  @if(loadingBuses()){
+  <div class="loading">Loading buses...</div>
+  } @else {
+  @for (bus of buses(); track bus.busId) {
+  <div class="card">
+    <div class="row" style="align-items: center;">
+      <div>
+        <strong>{{ bus.busNumber }}</strong> ({{ bus.busType }}) — {{ bus.source }} → {{ bus.destination }}<br>
+        <span style="font-size: 13px; color: var(--muted);">
+          Departs {{ bus.departureUtc | date:"medium" }} · {{ bus.availableSeats }}/{{ bus.totalSeats }} seats
+          available · ₹{{ bus.farePerSeat }}
+        </span>
+      </div>
+      <button class="btn small" (click)="viewBookings(bus)">View Bookings</button>
+    </div>
+  </div>
+  }
+  }
+
+  @if (selectedBus) {
+  <h3>Bookings for {{ selectedBus.busNumber }} ({{ selectedBus.source }} → {{ selectedBus.destination }})</h3>
+  @if (loadingBookings()) {
+  <div class="loading">Loading bookings...</div>
+  } @else if (bookings.length === 0) {
+  <div class="empty-state">No bookings for this bus yet.</div>
+  } @else {
+  @for (b of bookings(); track b.bookingId) {
+  <div class="card">
+    <strong>#{{ b.bookingId }}</strong> — {{ b.userName }} ({{ b.userEmail }})
+    <span class="badge" [class.confirmed]="b.status === 'Confirmed'" [class.cancelled]="b.status === 'Cancelled'"
+      style="margin-left: 8px;">{{ b.status }}</span>
+    <br>
+    <span style="font-size: 14px;">{{ b.seatsBooked }} seat(s) · ₹{{ b.totalFare }} · Booked {{ b.bookingDateUtc |
+      date:"medium" }}</span>
+  </div>
+  }
+  }
+  }
 
 </div>

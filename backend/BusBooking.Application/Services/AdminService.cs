@@ -119,4 +119,18 @@ public class AdminService : IAdminService
             FarePerSeat = bus.FarePerSeat
         };
     }
+
+    public async Task<List<BusOperatorResponse>> GetBusOperatorsAsync(CancellationToken ct = default)
+    {
+        return await _db.BusOperators
+            .Select(o => new BusOperatorResponse
+            {
+                OperatorId = o.Id,
+                Name = o.Name,
+                ContactEmail = o.ContactEmail,
+                ContactPhone = o.ContactPhone,
+                BusCount = o.Buses.Count
+            })
+            .ToListAsync(ct);
+    }
 }

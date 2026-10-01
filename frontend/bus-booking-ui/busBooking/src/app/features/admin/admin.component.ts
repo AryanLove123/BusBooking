@@ -23,6 +23,7 @@ export class AdminComponent implements OnInit {
   selectedBus?: AdminBusResponse;
   loadingBuses = signal<boolean>(true);
   loadingBookings = signal<boolean>(true);
+  loadingOperators = signal<boolean>(true);
 
   savingBus = signal<boolean>(false);
 
@@ -40,6 +41,7 @@ export class AdminComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadBuses();
+    this.loadOperators();
   }
 
   loadBuses(): void{
@@ -51,6 +53,19 @@ export class AdminComponent implements OnInit {
       },
       error: () =>{
         this.loadingBuses.set(false);
+      }
+    });
+  }
+
+  loadOperators(): void{
+    this.loadingOperators.set(true);
+    this.adminService.getBusOperators().subscribe({
+      next: (res) => {
+        this.operators.set(res);
+        this.loadingOperators.set(false);
+      },
+      error: () =>{
+        this.loadingOperators.set(false);
       }
     });
   }
@@ -90,7 +105,20 @@ export class AdminComponent implements OnInit {
     }).subscribe({
       next: () =>{
         this.notify.success("Bus created successfully!!");
+        this.savingBus.set(false);
+        this.busForm.reset({
+          busOperatorId: null,
+          busNumber: "",
+          busType: "",
+          source: "",
+          destination: "",
+          departureTime: "09:00",
+          durationMinutes: 180,
+          totalSeats: 40,
+          farePerSeat: 500
+        });
         this.loadBuses();
+        this.loadOperators();
       },
       error: (err) =>{
         this.savingBus.set(false);
